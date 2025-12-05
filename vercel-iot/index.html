@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard IoT</title>
+  <style>
+    body { font-family: Arial; text-align: center; padding: 20px; }
+    h1 { color: #333; }
+    .data-box { margin-top: 20px; padding: 20px; border: 1px solid #ccc; display: inline-block; border-radius: 10px; }
+    .value { font-size: 2em; color: #007BFF; }
+  </style>
+</head>
+<body>
+  <h1>Monitoring Suhu & Kelembapan</h1>
+  <div class="data-box">
+    <p>Suhu: <span id="suhu">0</span> °C</p>
+    <p>Kelembapan: <span id="kelembapan">0</span> %</p>
+    <p>Update terakhir: <span id="waktu">-</span></p>
+  </div>
+
+  <script>
+    async function updateData() {
+      try {
+        const response = await fetch('/api/save_data'); // Ambil data terbaru
+        const data = await response.json().catch(() => {
+          // fallback jika response bukan JSON (GET dari ESP32)
+          return { suhu: document.getElementById('suhu').innerText, kelembapan: document.getElementById('kelembapan').innerText, waktu: '-' };
+        });
+
+        if (data.suhu !== undefined) document.getElementById('suhu').innerText = data.suhu;
+        if (data.kelembapan !== undefined) document.getElementById('kelembapan').innerText = data.kelembapan;
+        if (data.waktu !== undefined) document.getElementById('waktu').innerText = data.waktu;
+      } catch (err) {
+        console.error("Error update data:", err);
+      }
+    }
+
+    // Update setiap 5 detik
+    setInterval(updateData, 5000);
+    updateData();
+  </script>
+</body>
+</html>
